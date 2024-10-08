@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./tektokronik-backend
+      dockerfile: Dockerfile
+    container_name: backend-container
+    ports:
+      - "8080:8080" # Host’un 8080 portu, container’ın 8080 portuna yönlendiriliyor
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/TEKTOKRONIK_DB?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Sevk@ugurel1280
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./tektokronik_frontend
+      dockerfile: Dockerfile
+      args:
+        VUE_APP_API_URL: http://localhost:8080 # API URL'si build argümanı olarak geçiriliyor
+    container_name: frontend-container
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
